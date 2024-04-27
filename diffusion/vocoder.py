@@ -15,6 +15,8 @@ class Vocoder:
             self.vocoder = NsfHifiGAN(vocoder_ckpt, device = device)
         elif vocoder_type == 'nsf-hifigan-log10':
             self.vocoder = NsfHifiGANLog10(vocoder_ckpt, device = device)
+        elif vocoder_type == 'univcode':
+            self.vocoder = Univnet(vocoder_ckpt, device=device)
         else:
             raise ValueError(f" [x] Unknown vocoder: {vocoder_type}")
             
@@ -93,3 +95,33 @@ class NsfHifiGANLog10(NsfHifiGAN):
             c = 0.434294 * mel.transpose(1, 2)
             audio = self.model(c, f0)
             return audio
+        
+
+class Univnet(torch.nn.Module):
+    def __init__(self, model_path, device=None):
+        super().__init__()
+        if device is None:
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.device = device
+        print('| Load Univnet: ', model_path)
+        self.model, self.h = load_model(model_path, device=self.device)
+
+    def sample_rate(self):
+        return self.h.sampling_rate
+
+    def hop_size(self):
+        return self.h.hop_size
+
+    def forward(self, audio, f0):
+        stft = STFT(
+            self.h.sampling_rate,
+            self.h.num_mels,
+            self.h.n_fft,
+            self.h.win_size,
+            self.h.hop_size,
+            self.h.fmin,
+            self.h.fmax)
+        with torch.no_grad():
+            mel = stft.get_mel(audio)
+            enhanced_audio = self.model(mel, f0[:, :mel.size(-1)]).view(-1)
+            return enhanced_audio, self.h.sampling_rate

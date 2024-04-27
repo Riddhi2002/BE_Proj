@@ -23,8 +23,8 @@ model:
   n_spk: 1 # max number of different speakers
 device: cuda
 vocoder:
-  type: 'nsf-hifigan'
-  ckpt: 'pretrain/nsf_hifigan/model'
+  type: 'univnet'
+  ckpt: 'pretrain/univnet/model'
 infer:
   speedup: 10
   method: 'dpm-solver++' # 'pndm' or 'dpm-solver' or 'ddim' or 'unipc' or 'dpm-solver++'
