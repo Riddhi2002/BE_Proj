@@ -15,7 +15,7 @@ class Vocoder:
             self.vocoder = NsfHifiGAN(vocoder_ckpt, device = device)
         elif vocoder_type == 'nsf-hifigan-log10':
             self.vocoder = NsfHifiGANLog10(vocoder_ckpt, device = device)
-        elif vocoder_type == 'univcode':
+        elif vocoder_type == 'univnet':
             self.vocoder = Univnet(vocoder_ckpt, device=device)
         else:
             raise ValueError(f" [x] Unknown vocoder: {vocoder_type}")

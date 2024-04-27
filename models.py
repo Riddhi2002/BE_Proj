@@ -362,7 +362,7 @@ class SynthesizerTrn(nn.Module):
                  n_speakers,
                  sampling_rate=44100,
                  vol_embedding=False,
-                 vocoder_name = "univcode",
+                 vocoder_name = "univnet",
                  use_depthwise_conv = False,
                  use_automatic_f0_prediction = True,
                  flow_share_parameter = False,
@@ -429,8 +429,8 @@ class SynthesizerTrn(nn.Module):
         elif vocoder_name == "nsf-snake-hifigan":
             from vdecoder.hifiganwithsnake.models import Generator
             self.dec = Generator(h=hps)
-        elif vocoder_name == "univcode":
-            from vdecoder.univcode.models import Generator
+        elif vocoder_name == "univnet":
+            from vdecoder.univnet.models import Generator
             self.dec = Generator(h=hps)
         else:
             print("[?] Unkown vocoder: use default(nsf-hifigan)")
