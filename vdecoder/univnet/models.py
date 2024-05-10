@@ -343,28 +343,29 @@ class LVCBlock(torch.nn.Module):
             nn.utils.remove_weight_norm(block[1])
 
 
-class Generator(nn.Module):
+class Generator(torch.nn.Module):
     """UnivNet Generator"""
 
-    def __init__(self, hp):
+    def __init__(self, h):
         super(Generator, self).__init__()
-        self.mel_channel = hp.audio.n_mel_channels
-        self.noise_dim = hp.gen.noise_dim
-        self.hop_length = hp.audio.hop_length
-        channel_size = hp.gen.channel_size
-        kpnet_conv_size = hp.gen.kpnet_conv_size
+        self.h=h
+        self.mel_channel = h.audio.n_mel_channels
+        self.noise_dim = h.gen.noise_dim
+        self.hop_length = h.audio.hop_length
+        channel_size = h.gen.channel_size
+        kpnet_conv_size = h.gen.kpnet_conv_size
 
         self.res_stack = nn.ModuleList()
         hop_length = 1
-        for stride in hp.gen.strides:
+        for stride in h.gen.strides:
             hop_length = stride * hop_length
             self.res_stack.append(
                 LVCBlock(
                     channel_size,
-                    hp.audio.n_mel_channels,
+                    h.audio.n_mel_channels,
                     stride=stride,
-                    dilations=hp.gen.dilations,
-                    lReLU_slope=hp.gen.lReLU_slope,
+                    dilations=h.gen.dilations,
+                    lReLU_slope=h.gen.lReLU_slope,
                     cond_hop_length=hop_length,
                     kpnet_conv_size=kpnet_conv_size
                 )
@@ -372,10 +373,10 @@ class Generator(nn.Module):
 
         self.conv_pre = \
             nn.utils.weight_norm(nn.Conv1d(
-                hp.gen.noise_dim, channel_size, 7, padding=3, padding_mode='reflect'))
+                h.gen.noise_dim, channel_size, 7, padding=3, padding_mode='reflect'))
 
         self.conv_post = nn.Sequential(
-            nn.LeakyReLU(hp.gen.lReLU_slope),
+            nn.LeakyReLU(h.gen.lReLU_slope),
             nn.utils.weight_norm(
                 nn.Conv1d(channel_size, 1, 7, padding=3, padding_mode='reflect')),
             nn.Tanh(),
